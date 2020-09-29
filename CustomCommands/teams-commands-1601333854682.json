@@ -1,0 +1,319 @@
+{
+  "entityResolver": {
+    "searchConfiguration": {
+      "maxEdits": 0
+    },
+    "type": "internal",
+    "isGenerated": true
+  },
+  "minIntentConfidence": 0.4,
+  "highIntentConfidence": 0.8,
+  "lgTemplates": [
+    "# timeOfDayGreeting",
+    "- IF: ${timeOfDay == 'morning'}",
+    "    - good morning",
+    "- ELSE:",
+    "    - good evening",
+    "# FallbackResponse",
+    "- Nice command, but not in my list yet",
+    "# LeaveCommand-e40827f0018511ebbf41c3f414b127bd",
+    "- See you soon",
+    "# HelloCommand-d26f3140018611ebbf41c3f414b127bd",
+    "- Hello there!",
+    "# LeaveCommand-TeamsControlBackendonSuccess-a28035e0018d11ebbf41c3f414b127bd",
+    "- Team was notified",
+    "# LeaveCommand-TeamsControlBackendonFailure-a28035e0018d11ebbf41c3f414b127bd",
+    "- Fail",
+    "# TurnOnOffCommand-e16abec0019b11ebbf41c3f414b127bd",
+    "- Which feature wants to turn {OnOff}",
+    "# HelloCommand-c23d1100019c11ebbf41c3f414b127bd",
+    "- Nice to see you {salutation}!",
+    "# TurnOnOff-Item",
+    "- Item is required",
+    "# TurnOnOffCommand-Item",
+    "- Item required",
+    "# TurnOnOffCommand-OnOff",
+    "- OnOff required",
+    "# TurnOnOffCommand-223d45b001a311ebbf41c3f414b127bd",
+    "- Turning {Item} {OnOff}"
+  ],
+  "type": "BaseLanguage",
+  "recognizer": {
+    "application": "",
+    "isStaging": false,
+    "versionId": "0.1",
+    "type": "luis"
+  },
+  "speechOutput": {
+    "font": "Microsoft Server Speech Text to Speech Voice (en-US, GuyRUS)",
+    "locale": "en-US"
+  },
+  "registeredKeywords": [
+    ""
+  ],
+  "webEndpoints": [
+    {
+      "name": "TeamsControlBackend",
+      "method": "POST",
+      "url": "https://func-customcommands.azurewebsites.net/api/TeamsCustomCommands",
+      "headers": {
+        "X-CustomCommands": "teams"
+      },
+      "parameters": {},
+      "sendFrame": false,
+      "updateFrame": false
+    }
+  ],
+  "globalParameters": [],
+  "commands": [
+    {
+      "name": "FallbackCommand",
+      "completionStrategy": "OnRequiredParameters",
+      "parameters": [],
+      "rules": [],
+      "completionRules": [
+        {
+          "name": "DefaultResponse",
+          "conditions": [
+            {
+              "type": "True"
+            }
+          ],
+          "actions": [
+            {
+              "type": "SpeechResponse",
+              "response": {
+                "type": "Template",
+                "templateName": "# FallbackResponse"
+              }
+            }
+          ],
+          "postExecutionState": "None"
+        }
+      ],
+      "triggeringExamples": [
+        "> - You can start sentences with '>' to add comments.",
+        "Help",
+        "Help me",
+        "What can you do?",
+        "How can I start?"
+      ],
+      "multiTurnExamples": []
+    },
+    {
+      "name": "LeaveCommand",
+      "completionStrategy": "OnRequiredParameters",
+      "parameters": [],
+      "rules": [],
+      "completionRules": [
+        {
+          "name": "Done",
+          "conditions": [
+            {
+              "type": "True"
+            }
+          ],
+          "actions": [
+            {
+              "type": "SpeechResponse",
+              "response": {
+                "type": "Template",
+                "templateName": "# LeaveCommand-e40827f0018511ebbf41c3f414b127bd"
+              }
+            },
+            {
+              "type": "CallHttpEndpoint",
+              "name": "TeamsControlBackend",
+              "content": {
+                "action": "leave"
+              },
+              "parameters": "",
+              "onSuccess": {
+                "type": "SpeechResponse",
+                "response": {
+                  "type": "Template",
+                  "templateName": "# LeaveCommand-TeamsControlBackendonSuccess-a28035e0018d11ebbf41c3f414b127bd"
+                }
+              },
+              "onFailure": {
+                "type": "SpeechResponse",
+                "response": {
+                  "type": "Template",
+                  "templateName": "# LeaveCommand-TeamsControlBackendonFailure-a28035e0018d11ebbf41c3f414b127bd"
+                }
+              }
+            }
+          ],
+          "nextTurnExpectations": [],
+          "postExecutionState": "CompleteCommand"
+        }
+      ],
+      "triggeringExamples": [
+        "Have to leave",
+        "Leave the meeting",
+        "Leave",
+        "I want to leave"
+      ]
+    },
+    {
+      "name": "HelloCommand",
+      "completionStrategy": "OnRequiredParameters",
+      "parameters": [
+        {
+          "name": "salutation",
+          "type": {
+            "name": "String",
+            "configuration": {
+              "type": "AnyInput"
+            }
+          }
+        }
+      ],
+      "rules": [],
+      "completionRules": [
+        {
+          "name": "Done",
+          "conditions": [
+            {
+              "type": "True"
+            },
+            {
+              "type": "ParameterValue",
+              "name": "salutation",
+              "value": ""
+            }
+          ],
+          "actions": [
+            {
+              "type": "SpeechResponse",
+              "response": {
+                "type": "Template",
+                "templateName": "# HelloCommand-d26f3140018611ebbf41c3f414b127bd"
+              }
+            }
+          ],
+          "nextTurnExpectations": [],
+          "postExecutionState": "CompleteCommand"
+        },
+        {
+          "name": "DoneSalutation",
+          "conditions": [
+            {
+              "type": "True"
+            },
+            {
+              "type": "RequiredParameters",
+              "names": [
+                "salutation"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": "SpeechResponse",
+              "response": {
+                "type": "Template",
+                "templateName": "# HelloCommand-c23d1100019c11ebbf41c3f414b127bd"
+              }
+            }
+          ],
+          "nextTurnExpectations": [],
+          "postExecutionState": "CompleteCommand"
+        }
+      ],
+      "triggeringExamples": [
+        "Hello",
+        "Hi",
+        "Good morning",
+        "Good afternoon",
+        "Hola",
+        "Hello {salutation}",
+        "Hi {salutation}",
+        "Good morning {salutation}",
+        "Good afternoon {salutation}",
+        "Hola {salutation}"
+      ]
+    },
+    {
+      "name": "TurnOnOffCommand",
+      "completionStrategy": "OnRequiredParameters",
+      "parameters": [
+        {
+          "name": "Item",
+          "type": {
+            "name": "String",
+            "configuration": {
+              "type": "StringList",
+              "values": {
+                "audio": [
+                  "sound"
+                ]
+              }
+            }
+          },
+          "elicitResponse": {
+            "type": "Template",
+            "templateName": "# TurnOnOffCommand-Item"
+          }
+        },
+        {
+          "name": "OnOff",
+          "type": {
+            "name": "String",
+            "configuration": {
+              "type": "StringList",
+              "values": {
+                "on": [],
+                "off": []
+              }
+            }
+          },
+          "elicitResponse": {
+            "type": "Template",
+            "templateName": "# TurnOnOffCommand-OnOff"
+          }
+        }
+      ],
+      "rules": [],
+      "completionRules": [
+        {
+          "name": "Done",
+          "conditions": [
+            {
+              "type": "True"
+            },
+            {
+              "type": "RequiredParameters",
+              "names": [
+                "Item",
+                "OnOff"
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": "SpeechResponse",
+              "response": {
+                "type": "Template",
+                "templateName": "# TurnOnOffCommand-223d45b001a311ebbf41c3f414b127bd"
+              }
+            }
+          ],
+          "nextTurnExpectations": [],
+          "postExecutionState": "CompleteCommand"
+        }
+      ],
+      "triggeringExamples": [
+        "turn the {Item} {OnOff}",
+        "turn {OnOff} the {Item}",
+        "i want to turn {Item} {OnOff}",
+        "please, turn {Item} {OnOff}",
+        "{Item} {OnOff}",
+        "turn {OnOff}",
+        "{Item} {OnOff}",
+        "control teams",
+        "i want the {Item} {OnOff}"
+      ]
+    }
+  ]
+}

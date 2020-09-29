@@ -1,0 +1,9 @@
+# HTTP request example
+
+POST http://localhost:7071/api/TeamsCustomCommands
+Content-Type: application/json
+
+{
+    "item" : "camera",
+    "action" : "on"
+}
